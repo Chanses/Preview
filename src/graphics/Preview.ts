@@ -6,6 +6,7 @@ import {
     Scene,
     WebGLRenderer,
 } from 'three';
+import { FrameHandler } from '../helpers/FrameHandler';
 
 export class Preview {
     /**
@@ -38,6 +39,12 @@ export class Preview {
      */
     private readonly scene: Scene;
 
+    /**
+     * Frame handler
+     * @private
+     */
+    private readonly frameHandler: FrameHandler;
+
     public constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
         this.renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -52,18 +59,17 @@ export class Preview {
         this.resize = this.resize.bind(this);
         this.resizeObserver = new ResizeObserver(this.resize);
         this.resizeObserver.observe(this.canvas);
+        this.frameHandler = new FrameHandler(this.update);
         this.resize();
-        this.update();
+        this.frameHandler.start();
     }
 
     /**
      * Update logic
      * @private
      */
-    private update() {
+    private update(_delta: number) {
         this.render();
-
-        requestAnimationFrame(this.update);
     }
 
     /**
@@ -97,5 +103,6 @@ export class Preview {
      */
     public dispose() {
         this.resizeObserver.disconnect();
+        this.frameHandler.stop();
     }
 }
